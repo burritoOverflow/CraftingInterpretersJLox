@@ -58,6 +58,12 @@ public final class Lox {
         report(line, "", message);
     }
 
+    /**
+     * Display the error and context to the user via stderr
+     * @param line the line where the error occurred
+     * @param where
+     * @param message informative string to output
+     */
     private static void report(int line, String where, String message) {
         System.err.printf("[line %s] Error:%s: message %s%n", line, where, message);
         hadError = true;
