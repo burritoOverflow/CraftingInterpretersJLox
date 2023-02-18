@@ -15,7 +15,7 @@ public class Scanner {
         line - tracks what source line current is on
     */
     private final String source;
-    private final List<Token> tokens = new ArrayList<>();
+    private final List<Token> tokens;
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -44,6 +44,7 @@ public class Scanner {
 
     public Scanner(String source) {
         this.source = source;
+        this.tokens = new ArrayList<>();
     }
 
     /**

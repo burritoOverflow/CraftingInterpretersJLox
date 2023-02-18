@@ -71,7 +71,7 @@ public final class Lox {
      * @param message informative string to output
      */
     private static void report(int line, String where, String message) {
-        System.err.printf("[line %s] Error:%s: message %s%n", line, where, message);
+        System.err.printf("[line %s] Error:%s %s%n", line, where, message);
         hadError = true;
     }
 }
