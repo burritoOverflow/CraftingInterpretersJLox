@@ -30,6 +30,11 @@ public final class Lox {
         if (hadError) System.exit(64);
     }
 
+    /**
+     * Run a REPL and (for the time) display the tokens
+     *
+     * @throws IOException
+     */
     private static void runPrompt() throws IOException {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
@@ -60,7 +65,8 @@ public final class Lox {
 
     /**
      * Display the error and context to the user via stderr
-     * @param line the line where the error occurred
+     *
+     * @param line    the line where the error occurred
      * @param where
      * @param message informative string to output
      */

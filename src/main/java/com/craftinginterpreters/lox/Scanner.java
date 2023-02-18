@@ -1,7 +1,9 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.craftinginterpreters.lox.TokenType.*;
 
@@ -17,6 +19,28 @@ public class Scanner {
     private int start = 0;
     private int current = 0;
     private int line = 1;
+
+    private static final Map<String, TokenType> keywords;
+
+    static {
+        keywords = new HashMap<>();
+        keywords.put("and", AND);
+        keywords.put("class", CLASS);
+        keywords.put("else", ELSE);
+        keywords.put("false", FALSE);
+        keywords.put("for", FOR);
+        keywords.put("fun", FUN);
+        keywords.put("if", IF);
+        keywords.put("nil", NIL);
+        keywords.put("or", OR);
+        keywords.put("print", PRINT);
+        keywords.put("return", RETURN);
+        keywords.put("super", SUPER);
+        keywords.put("this", THIS);
+        keywords.put("true", TRUE);
+        keywords.put("var", VAR);
+        keywords.put("while", WHILE);
+    }
 
     public Scanner(String source) {
         this.source = source;
@@ -104,6 +128,8 @@ public class Scanner {
             default:
                 if (isDigit(c)) {
                     number();
+                } else if (isAlpha(c)) {
+                    identifier();
                 } else {
                     Lox.error(line, String.format("Unexpected Character: %c", c));
                 }
@@ -154,6 +180,22 @@ public class Scanner {
         addToken(STRING, value);
     }
 
+    private void identifier() {
+        // consume all valid characters in an identifier
+        while (isAlphanumeric(peek())) {
+            advance();
+        }
+        final String text = source.substring(start, current);
+        final boolean isReservedToken = keywords.containsKey(text);
+        if (isReservedToken) {
+            final TokenType tokenType = keywords.get(text);
+            addToken(tokenType);
+        } else {
+            // not a reserved word, identifier
+            addToken(IDENTIFIER);
+        }
+    }
+
     /**
      * Only consume the character if it's what is expected
      * i.e determine if a single character lexeme/operator or a more complex operator
@@ -194,6 +236,15 @@ public class Scanner {
 
     private boolean isDigit(char c) {
         return '0' <= c && '9' >= c;
+    }
+
+    private boolean isAlpha(char c) {
+        // allow a leading underscore
+        return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+    }
+
+    private boolean isAlphanumeric(char c) {
+        return isAlpha(c) || isDigit(c);
     }
 
     /**
