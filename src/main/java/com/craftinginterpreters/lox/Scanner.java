@@ -14,8 +14,13 @@ public class Scanner {
         current - points to the character currently being considered
         line - tracks what source line current is on
     */
+
+    // the source string provided to the interpreter
     private final String source;
+
+    // the list of scanned tokens
     private final List<Token> tokens;
+
     private int start = 0;
     private int current = 0;
     private int line = 1;
@@ -63,6 +68,9 @@ public class Scanner {
         return tokens;
     }
 
+    /**
+     * Advance through the source string consuming lexemes and storing the corresponding tokens
+     */
     private void scanToken() {
         final char c = advance();
         switch (c) {
@@ -200,7 +208,7 @@ public class Scanner {
     /**
      * Only consume the character if it's what is expected
      * i.e determine if a single character lexeme/operator or a more complex operator
-     * like '!' or '!='
+     * Make the determination between '!' or '!=', for example
      *
      * @param expected the anticipated character
      * @return true of the current character is as expected
@@ -266,10 +274,21 @@ public class Scanner {
         return source.charAt(current++);
     }
 
+    /**
+     * Create a new token for the text of the current lexeme
+     *
+     * @param tokenType the type of token to add to the Scanner's token collection
+     */
     private void addToken(TokenType tokenType) {
         addToken(tokenType, null);
     }
 
+    /**
+     * Create a new token for the text of the current lexeme given the type and literal, store in the Scanner's collection
+     *
+     * @param tokenType the type of token to add to the Scanner's token collection
+     * @param literal   the literal value of the token
+     */
     private void addToken(TokenType tokenType, Object literal) {
         final String text = source.substring(start, current);
         tokens.add(new Token(tokenType, text, literal, line));

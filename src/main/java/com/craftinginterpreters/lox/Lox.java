@@ -50,6 +50,11 @@ public final class Lox {
         }
     }
 
+    /**
+     * Run the interpreter for the given source string
+     *
+     * @param source the string to run in the interpreter
+     */
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
