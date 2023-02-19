@@ -79,4 +79,13 @@ public final class Lox {
         System.err.printf("[line %s] Error:%s %s%n", line, where, message);
         hadError = true;
     }
+
+    static void error(Token token, String message) {
+        if (token.tokenType == TokenType.EOF) {
+            report(token.line, " at end", message);
+        } else {
+            report(token.line, String.format(" at '%s'", token.lexeme), message);
+        }
+    }
+
 }

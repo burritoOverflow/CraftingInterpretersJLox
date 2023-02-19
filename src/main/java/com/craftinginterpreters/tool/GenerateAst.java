@@ -20,6 +20,7 @@ public class GenerateAst {
         final String outputDir = args[0];
         System.out.printf("Generating AST in directory: %s\n", outputDir);
 
+        // generate the `Expr` class with the corresponding derived classes
         defineAst(outputDir, "Expr", Arrays.asList(
                 "Binary   : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
@@ -63,7 +64,7 @@ public class GenerateAst {
         printWriter.println();
         printWriter.println(String.format("abstract class %s {", basename));
 
-        // generate the Visitor interface inside of the base class
+        // generate the Visitor interface and the derived classes inside of the base class
         defineVisitor(printWriter, basename, types);
 
         // generate AST classes.
@@ -97,6 +98,14 @@ public class GenerateAst {
         printWriter.println("   }");
     }
 
+    /**
+     * Generate code for the class `className` that implements the `accept` method
+     *
+     * @param writer    PrintWriter for writing the source file
+     * @param basename  the base class Type name
+     * @param className this derived class
+     * @param fieldList the list of members/fields for this type
+     */
     private static void defineType(PrintWriter writer, String basename, String className, String fieldList) {
         writer.println(String.format("  static class %s extends %s {", className, basename));
 
