@@ -132,3 +132,5 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
+# generated source file
+/src/main/java/com/craftinginterpreters/lox/Expr.java

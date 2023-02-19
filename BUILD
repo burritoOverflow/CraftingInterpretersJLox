@@ -12,3 +12,10 @@ java_binary(
     main_class = "com.craftinginterpreters.lox.Lox",
     deps =[":GenerateAst"]
 )
+
+java_binary(
+    name = "AstPrinter",
+    srcs = glob(["src/main/java/com/craftinginterpreters/**/*.java"]),
+    main_class = "com.craftinginterpreters.lox.AstPrinter",
+    deps =[":GenerateAst"]
+)
