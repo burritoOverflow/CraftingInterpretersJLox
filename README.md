@@ -13,7 +13,7 @@ $ bazel build //:GenerateAst
 And generate the source files in the same directory as the rest of the `Lox` package:
 
 ```shell
-$ /bazel-bin/GenerateAst src/main/java/com/craftinginterpreters/lox/
+$ ./bazel-bin/GenerateAst src/main/java/com/craftinginterpreters/lox/
 ```
 
 To build the interpreter with Bazel:
