@@ -58,10 +58,14 @@ public final class Lox {
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
+        final Parser parser = new Parser(tokens);
+        final Expr expression = parser.parse();
 
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
+        // stop parsing if there is a syntax error
+        if (hadError) return;
+
+        // display tokens for now
+        System.out.println(new AstPrinter().print(expression));
     }
 
     static void error(int line, String message) {

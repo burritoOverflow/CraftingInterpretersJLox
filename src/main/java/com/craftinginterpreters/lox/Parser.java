@@ -22,6 +22,14 @@ public class Parser {
         this.current = 0;
     }
 
+    Expr parse() {
+        try {
+            return expression();
+        } catch (ParseError parseError) {
+            return null;
+        }
+    }
+
     private Expr expression() {
         return equality();
     }
@@ -118,22 +126,20 @@ public class Parser {
      * @return
      */
     private Expr primary() {
-        Expr primaryExpr = null;
-
         if (match(TRUE)) {
-            primaryExpr = new Expr.Literal(TRUE);
+            return new Expr.Literal(TRUE);
         }
 
         if (match(FALSE)) {
-            primaryExpr = new Expr.Literal(FALSE);
+            return new Expr.Literal(FALSE);
         }
 
         if (match(NIL)) {
-            primaryExpr = new Expr.Literal(NIL);
+            return new Expr.Literal(NIL);
         }
 
         if (match(NUMBER, STRING)) {
-            primaryExpr = new Expr.Literal(previous().literal);
+            return new Expr.Literal(previous().literal);
         }
 
         if (match(LEFT_PAREN)) {
@@ -141,10 +147,10 @@ public class Parser {
             // if we have an opening paren, verify that this ends in a closing paren
             // after parsing the expression inside
             consume(RIGHT_PAREN, "Expect ')' after expression");
-            primaryExpr = new Expr.Grouping(expr);
+            return new Expr.Grouping(expr);
         }
 
-        return primaryExpr;
+        throw error(peek(), "Expect expression.");
     }
 
     private boolean match(TokenType... types) {
