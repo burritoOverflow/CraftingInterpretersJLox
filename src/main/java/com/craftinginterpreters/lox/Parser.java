@@ -35,11 +35,12 @@ public class Parser {
         Expr expr = comparison();
 
         while (match(BANG_EQUAL, EQUAL_EQUAL)) {
+            // match consumes the token when true, so we'll need the previous token
             final Token operator = previous();
             final Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
         }
-
+        // no more equality operators
         return expr;
     }
 
@@ -148,7 +149,7 @@ public class Parser {
 
     private boolean match(TokenType... types) {
         for (final TokenType type : types) {
-            // continue to advance only if the token is of the expected type
+            // advance only if the token is of the expected type
             if (check(type)) {
                 advance();
                 return true;
@@ -216,5 +217,33 @@ public class Parser {
     private ParseError error(Token token, String message) {
         Lox.error(token, message);
         return new ParseError();
+    }
+
+    /**
+     * Clear out call frames; attempt to discard tokens until finding a statement boundary
+     */
+    private void synchronize() {
+        advance();
+
+        while (!isAtEnd()) {
+            // end of a statement boundary
+            if (previous().tokenType == SEMICOLON) {
+                return;
+            }
+
+            switch (peek().tokenType) {
+                case CLASS:
+                case FOR:
+                case FUN:
+                case IF:
+                case PRINT:
+                case RETURN:
+                case VAR:
+                case WHILE:
+                    return;
+            }
+
+            advance();
+        }
     }
 }
