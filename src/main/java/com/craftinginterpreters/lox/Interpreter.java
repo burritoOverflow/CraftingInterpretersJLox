@@ -46,18 +46,23 @@ public class Interpreter implements Expr.Visitor<Object> {
 
         switch (expr.operator.tokenType) {
             case GREATER:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left > (double) right;
 
             case GREATER_EQUAL:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left >= (double) right;
 
             case LESS:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left < (double) right;
 
             case LESS_EQUAL:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left <= (double) right;
 
             case MINUS:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left - (double) right;
 
             case PLUS:
@@ -70,12 +75,17 @@ public class Interpreter implements Expr.Visitor<Object> {
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                break;
+
+                // no cases met; error.
+                throw new RuntimeError(expr.operator,
+                        "Operands must be either two numbers or two Strings.");
 
             case SLASH:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left / (double) right;
 
             case STAR:
+                checkNumberOperands(expr.operator, left, right);
                 return (double) left * (double) right;
 
             case EQUAL_EQUAL:
@@ -104,6 +114,7 @@ public class Interpreter implements Expr.Visitor<Object> {
 
         switch (expr.operator.tokenType) {
             case MINUS:
+                checkNumberOperand(expr.operator, right);
                 return -(double) right;
 
             case BANG:
@@ -113,4 +124,32 @@ public class Interpreter implements Expr.Visitor<Object> {
 
         return null;
     }
+
+    /**
+     * Check that the operand is a valid type; used for runtime error checking.
+     * Used for Unary runtime error checking.
+     * i.e operator operand -> -12 or !34
+     *
+     * @param operator operator applied to the operand
+     * @param operand  the operand
+     */
+    private void checkNumberOperand(Token operator, Object operand) {
+        if (operand instanceof Double) return;
+        throw new RuntimeError(operator, "Operand must be a number.");
+    }
+
+
+    /**
+     * Check that the operands are valid types; used for runtime error checking.
+     * i.e left operator right -> 12 + 13
+     *
+     * @param operator the arithmetic operator
+     * @param left     left operator
+     * @param right    right operator
+     */
+    private void checkNumberOperands(Token operator, Object left, Object right) {
+        if (left instanceof Double && right instanceof Double) return;
+        throw new RuntimeError(operator, "Operands must be numbers.");
+    }
+
 }

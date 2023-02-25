@@ -99,7 +99,7 @@ public class GenerateAst {
     }
 
     /**
-     * Generate code for the class `className` that implements the `accept` method
+     * Generate code for the class `className` that implements the `accept` method for the `Visitor` pattern.
      *
      * @param writer    PrintWriter for writing the source file
      * @param basename  the base class Type name
