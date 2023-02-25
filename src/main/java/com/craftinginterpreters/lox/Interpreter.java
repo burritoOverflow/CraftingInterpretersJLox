@@ -1,6 +1,38 @@
 package com.craftinginterpreters.lox;
 
 public class Interpreter implements Expr.Visitor<Object> {
+
+    /**
+     * Public interface for the Interpreter
+     *
+     * @param expression the expression to interpret
+     */
+    void interpret(Expr expression) {
+        try {
+            final Object value = evaluate(expression);
+            System.out.println(stringify(value));
+        } catch (RuntimeError error) {
+            Lox.runtimeError(error);
+        }
+    }
+
+    private String stringify(Object object) {
+        if (object == null) {
+            return "nil";
+        }
+
+        // Display integer values without trailing decimal (Lox only supports double type)
+        if (object instanceof Double) {
+            String text = object.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
+        }
+
+        return object.toString();
+    }
+
     private Object evaluate(Expr expr) {
         return expr.accept(this);
     }
