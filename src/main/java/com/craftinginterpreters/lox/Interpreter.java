@@ -114,6 +114,8 @@ public class Interpreter implements Expr.Visitor<Object> {
 
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
+                // we've already verified both are of type Double, so just check if right == 0
+                checkValidDivisor(expr.operator, right);
                 return (double) left / (double) right;
 
             case STAR:
@@ -182,6 +184,22 @@ public class Interpreter implements Expr.Visitor<Object> {
     private void checkNumberOperands(Token operator, Object left, Object right) {
         if (left instanceof Double && right instanceof Double) return;
         throw new RuntimeError(operator, "Operands must be numbers.");
+    }
+
+    /**
+     * Check for attempts to divide by zero; throw if value is "near" zero
+     *
+     * @param operator the operator for RuntimeError reporting
+     * @param divisor  the attempted divisor
+     */
+    private void checkValidDivisor(Token operator, Object divisor) {
+        final double epsilon = 0.00001;
+        final double d = (double) divisor;
+
+        if (d < epsilon && d > -epsilon) {
+            // we'll assume this is close enough to 0
+            throw new RuntimeError(operator, "Cannot divide by 0.");
+        }
     }
 
 }
