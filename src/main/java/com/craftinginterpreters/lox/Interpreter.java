@@ -72,7 +72,8 @@ public class Interpreter implements Expr.Visitor<Object> {
     }
 
     @Override
-    public Object visitBinaryExpr(Expr.Binary expr) {
+    public Object visitBinaryExpr(Expr.Binary expr) throws RuntimeError {
+        // get the value of both literals
         final Object left = evaluate(expr.left);
         final Object right = evaluate(expr.right);
 
@@ -163,11 +164,12 @@ public class Interpreter implements Expr.Visitor<Object> {
      * Check that the operand is a valid type; used for runtime error checking.
      * Used for Unary runtime error checking.
      * i.e operator operand -> -12 or !34
+     * Throws iff operand is not instanceof Double.
      *
      * @param operator operator applied to the operand
      * @param operand  the operand
      */
-    private void checkNumberOperand(Token operator, Object operand) {
+    private void checkNumberOperand(Token operator, Object operand) throws RuntimeError {
         if (operand instanceof Double) return;
         throw new RuntimeError(operator, "Operand must be a number.");
     }
@@ -181,18 +183,19 @@ public class Interpreter implements Expr.Visitor<Object> {
      * @param left     left operator
      * @param right    right operator
      */
-    private void checkNumberOperands(Token operator, Object left, Object right) {
+    private void checkNumberOperands(Token operator, Object left, Object right) throws RuntimeError {
         if (left instanceof Double && right instanceof Double) return;
         throw new RuntimeError(operator, "Operands must be numbers.");
     }
 
     /**
-     * Check for attempts to divide by zero; throw if value is "near" zero
+     * Check for attempts to divide by zero; throw if value is "near" zero.
+     * Throws iff `divisor` ~= 0.0
      *
      * @param operator the operator for RuntimeError reporting
      * @param divisor  the attempted divisor
      */
-    private void checkValidDivisor(Token operator, Object divisor) {
+    private void checkValidDivisor(Token operator, Object divisor) throws RuntimeError {
         final double epsilon = 0.00001;
         final double d = (double) divisor;
 
