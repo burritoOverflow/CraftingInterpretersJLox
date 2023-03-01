@@ -12,7 +12,7 @@ primary         -> NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" ;
 ```
 
-Grammar from section `8.1`:
+Revised grammar from section `8.1`:
 
 ```
 program         -> statement* EOF ;
