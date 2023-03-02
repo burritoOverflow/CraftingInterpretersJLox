@@ -26,13 +26,15 @@ public class GenerateAst {
                 "Binary   : Expr left, Token operator, Expr right",
                 "Grouping : Expr expression",
                 "Literal  : Object value",
+                "Variable : Token name",
                 "Unary    : Token operator, Expr right"
         ));
 
         // define the 'Stmt' class and the corresponding derived classes
         defineAst(outputDir, "Stmt", Arrays.asList(
                 "Expression  : Expr expression",
-                "Print       : Expr expression"
+                "Print       : Expr expression",
+                "Var         : Token name, Expr initializer"
         ));
     }
 

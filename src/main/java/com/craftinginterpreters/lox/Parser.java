@@ -26,7 +26,7 @@ public class Parser {
     List<Stmt> parse() {
         List<Stmt> statements = new ArrayList<>();
         while (!isAtEnd()) {
-            statements.add(statement());
+            statements.add(declaration());
         }
         return statements;
     }
@@ -38,6 +38,22 @@ public class Parser {
      */
     private Expr expression() {
         return equality();
+    }
+
+    /**
+     * declaration  -> varDecl
+     * | statement ;
+     *
+     * @return
+     */
+    private Stmt declaration() throws ParseError {
+        try {
+            if (match(VAR)) return varDeclaration();
+            return statement();
+        } catch (ParseError parseError) {
+            synchronize();
+            return null;
+        }
     }
 
     /**
@@ -55,6 +71,26 @@ public class Parser {
         final Expr value = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
+    }
+
+    /**
+     * varDecl  -> "var" IDENTIFIER ( "=" expression )? ";" ;
+     *
+     * @return
+     */
+    private Stmt varDeclaration() {
+        // Consume the identifier for the variable declared i.e `var myVar`
+        final Token name = consume(IDENTIFIER, "Expect variable name");
+
+        Expr initializer = null;
+        if (match(EQUAL)) {
+            //here `var myVar = expression`
+            initializer = expression();
+        }
+
+        // Either way, we expect a declaration without initialization, `var myVar;`
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
     }
 
 
@@ -175,6 +211,10 @@ public class Parser {
 
         if (match(NUMBER, STRING)) {
             return new Expr.Literal(previous().literal);
+        }
+
+        if (match(IDENTIFIER)) {
+            return new Expr.Variable(previous());
         }
 
         if (match(LEFT_PAREN)) {

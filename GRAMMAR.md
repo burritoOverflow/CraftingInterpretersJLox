@@ -21,3 +21,25 @@ statement       -> exprStmt
 exprStmt        -> expression ";" ;
 printStmt       -> "print" expression ";" ;               
 ```
+
+Revised grammar for statements that declare names:
+
+```
+program         -> declaration* EOF ;
+declaration     -> varDecl 
+                | statement ;
+varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
+statement       -> exprStmt
+                | printStmt ;
+```
+
+For accessing a variable, we can use the `primary` expression:
+
+```
+primary     -> "true" | "false" | "nil"
+            | NUMBER | STRING 
+            | "(" expression ")"
+            IDENTIFIER ;
+```
+
+Note that unlike the original primary, this includes IDENTIFIER.
