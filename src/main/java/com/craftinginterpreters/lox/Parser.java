@@ -32,12 +32,12 @@ public class Parser {
     }
 
     /**
-     * expression -> equality ;
+     * expression -> assignment ;
      *
      * @return
      */
     private Expr expression() {
-        return equality();
+        return assignment();
     }
 
     /**
@@ -95,7 +95,7 @@ public class Parser {
 
 
     /**
-     * exprStmt        -> expression ";" ;
+     * exprStmt -> expression ";" ;
      *
      * @return
      */
@@ -103,6 +103,29 @@ public class Parser {
         final Expr expr = expression();
         consume(SEMICOLON, "Expect ';' after value.");
         return new Stmt.Expression(expr);
+    }
+
+    /**
+     * assignment -> IDENTIFIER "=" assignment | equality ;
+     *
+     * @return
+     */
+    private Expr assignment() {
+        Expr expr = equality();
+
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+
+            if (expr instanceof Expr.Variable) {
+                final Token name = ((Expr.Variable) expr).name;
+                return new Expr.Assign(name, value);
+            }
+
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     /**
