@@ -19,9 +19,11 @@ Revised grammar from section `8.1`:
 ```
 program         -> statement* EOF ;
 statement       -> exprStmt
-                | printStmt ;
+                | printStmt
+                | block ;
 exprStmt        -> expression ";" ;
 printStmt       -> "print" expression ";" ;               
+block           -> "{" declaration* "}" ;
 ```
 
 Revised grammar for statements that declare names:
@@ -32,7 +34,9 @@ declaration     -> varDecl
                 | statement ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 statement       -> exprStmt
-                | printStmt ;
+                | printStmt
+                | block ;
+block           -> "{" declaration* "}" ;
 ```
 
 For accessing a variable, we can use the `primary` expression:

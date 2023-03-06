@@ -33,6 +33,8 @@ public class GenerateAst {
 
         // define the 'Stmt' class and the corresponding derived classes
         defineAst(outputDir, "Stmt", Arrays.asList(
+                // <ClassName> : <ClassMembers>
+                "Block       : List<Stmt> statements",
                 "Expression  : Expr expression",
                 "Print       : Expr expression",
                 "Var         : Token name, Expr initializer"
