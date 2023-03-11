@@ -212,6 +212,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         final Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
@@ -248,7 +258,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     /**
      * Check that the operands are valid types; used for runtime error checking.
-     * i.e left operator right -> 12 + 13
+     * i.e. left operator right -> 12 + 13
      *
      * @param operator the arithmetic operator
      * @param left     left operator

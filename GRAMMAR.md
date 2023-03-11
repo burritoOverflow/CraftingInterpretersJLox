@@ -14,14 +14,17 @@ primary         -> NUMBER | STRING | "true" | "false" | "nil"
                 IDENTIFIER ;
 ```
 
-Revised grammar from section `8.1`:
+Revised grammar from section `8.1` and `9.1`.
 
 ```
 program         -> statement* EOF ;
 statement       -> exprStmt
+                | ifStmt
                 | printStmt
                 | block ;
 exprStmt        -> expression ";" ;
+ifStmt          -> "if" "(" expression ")" statement ;
+                ( "else" statement )? ;
 printStmt       -> "print" expression ";" ;               
 block           -> "{" declaration* "}" ;
 ```
