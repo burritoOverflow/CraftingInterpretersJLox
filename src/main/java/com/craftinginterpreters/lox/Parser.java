@@ -260,15 +260,15 @@ public class Parser {
      */
     private Expr primary() {
         if (match(TRUE)) {
-            return new Expr.Literal(TRUE);
+            return new Expr.Literal(true);
         }
 
         if (match(FALSE)) {
-            return new Expr.Literal(FALSE);
+            return new Expr.Literal(false);
         }
 
         if (match(NIL)) {
-            return new Expr.Literal(NIL);
+            return new Expr.Literal(null);
         }
 
         if (match(NUMBER, STRING)) {
