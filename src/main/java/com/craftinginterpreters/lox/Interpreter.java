@@ -178,6 +178,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        final Object left = evaluate(expr.left);
+
+        if (expr.operator.tokenType.equals(TokenType.OR)) {
+            // short_circuit left iff left evaluates to Truthy
+            if (isTruthy(left)) return left;
+        } else {
+            // AND
+            if (!isTruthy(left)) return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
+    @Override
     public Object visitVariableExpr(Expr.Variable expr) {
         return environment.get(expr.name);
     }
@@ -225,6 +240,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Void visitPrintStmt(Stmt.Print stmt) {
         final Object value = evaluate(stmt.expression);
         System.out.println(stringify(value));
+        return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while (isTruthy(stmt.condition)) {
+            execute(stmt.body);
+        }
         return null;
     }
 

@@ -135,3 +135,7 @@ fabric.properties
 # generated source file
 /src/main/java/com/craftinginterpreters/lox/Expr.java
 /src/main/java/com/craftinginterpreters/lox/Stmt.java
+
+
+# jlox source files
+*.jlox
