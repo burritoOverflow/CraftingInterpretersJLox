@@ -22,11 +22,15 @@ Revised grammar from section `8.1` and `9.1`.
 ```
 program         -> statement* EOF ;
 statement       -> exprStmt
+                | forStmt
                 | ifStmt
                 | printStmt
                 | whileStmt
                 | block ;
 exprStmt        -> expression ";" ;
+forStmt         -> "for" "(" ( varDecl | exprStmt | ";" )
+                expression? ";"
+                expression? ")" statement ;
 ifStmt          -> "if" "(" expression ")" statement ;
                 ( "else" statement )? ;
 printStmt       -> "print" expression ";" ;               

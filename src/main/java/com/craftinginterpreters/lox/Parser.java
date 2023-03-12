@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.craftinginterpreters.lox.TokenType.*;
@@ -63,11 +64,70 @@ public class Parser {
      * @return
      */
     private Stmt statement() {
+        if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement();
+    }
+
+    /**
+     * forStmt -> "for" "(" ( varDecl | exprStmt | ";" )
+     * expression? ";"
+     * expression? ")" statement ;
+     * <p>
+     * for (initializer ; condition ; increment)
+     *
+     * @return
+     */
+    private Stmt forStatement() {
+        consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+        Stmt initializer;
+        if (match(SEMICOLON)) {
+            // initializer omitted
+            initializer = null;
+        } else if (match(VAR)) {
+            initializer = varDeclaration();
+        } else {
+            initializer = expressionStatement();
+        }
+
+        // second `point` in the loop
+        Expr condition = null;
+        if (!check(SEMICOLON)) {
+            condition = expression();
+        } // if false, condition is omitted
+        consume(SEMICOLON, "Expect ';' after condition.");
+
+        Expr increment = null;
+        if (!check(RIGHT_PAREN)) {
+            increment = expression();
+        } // if false increment is omitted
+
+        consume(RIGHT_PAREN, "Expect ')' after clauses.");
+
+        // body of the for loop is all that remains
+        Stmt body = statement();
+
+        if (increment != null) {
+            body = new Stmt.Block(Arrays.asList(body, new Stmt.Expression(increment)));
+        }
+
+        if (condition == null) {
+            // infinite loop if no condition provided
+            condition = new Expr.Literal(true);
+        }
+
+        // our for loop is just a while loop
+        body = new Stmt.While(condition, body);
+
+        if (initializer != null) {
+            body = new Stmt.Block(Arrays.asList(initializer, body));
+        }
+
+        return body;
     }
 
     /**

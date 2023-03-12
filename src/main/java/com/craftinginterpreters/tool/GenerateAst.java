@@ -82,7 +82,7 @@ public class GenerateAst {
         printWriter.println();
         printWriter.println(String.format("abstract class %s {", basename));
 
-        // generate the Visitor interface and the derived classes inside of the base class
+        // generate the Visitor interface and the derived classes inside the base class
         defineVisitor(printWriter, basename, types);
 
         // generate AST classes.
