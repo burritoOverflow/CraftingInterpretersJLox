@@ -3,9 +3,12 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 public class LoxFunction implements LoxCallable {
+    // store the environment surrounding the function's declaration
+    private final Environment closure;
     private final Stmt.Function declaration;
 
-    public LoxFunction(Stmt.Function declaration) {
+    public LoxFunction(Stmt.Function declaration, Environment closure) {
+        this.closure = closure;
         this.declaration = declaration;
     }
 
@@ -16,8 +19,11 @@ public class LoxFunction implements LoxCallable {
 
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
-        final Environment environment = new Environment(interpreter.globals);
+        // use the provided closure environment as the call's environment
+        // so this new env's enclosing is the function's closure
+        final Environment environment = new Environment(this.closure);
 
+        // add to the environment the identifier for the parameter (key) and the value
         for (int i = 0; i < this.declaration.params.size(); i++) {
             environment.define(declaration.params.get(i).lexeme, arguments.get(i));
         }

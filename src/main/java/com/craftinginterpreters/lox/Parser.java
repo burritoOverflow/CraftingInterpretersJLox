@@ -12,12 +12,7 @@ import static com.craftinginterpreters.lox.TokenType.*;
  */
 public class Parser {
     private static final int MAX = 255;
-
-    private static class ParseError extends RuntimeException {
-    }
-
     private final List<Token> tokens;
-
     // track the next token to be parsed
     private int current;
 
@@ -207,7 +202,6 @@ public class Parser {
         consume(SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
     }
-
 
     /**
      * exprStmt -> expression ";" ;
@@ -578,5 +572,8 @@ public class Parser {
 
             advance();
         }
+    }
+
+    private static class ParseError extends RuntimeException {
     }
 }
