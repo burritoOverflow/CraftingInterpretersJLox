@@ -11,13 +11,14 @@ comparison      -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term            -> factor ( ( "-" | "+" ) factor )* ;
 factor          -> unary ( ( "/" | "*" ) unary )* ;
 unary           -> ( "!" | "-" ) unary
-                | primary ;
+                | call ;
+call            -> primary ( "(" arguments? ")" )* ;
 primary         -> NUMBER | STRING | "true" | "false" | "nil"                   
                 | "(" expression ")" ;
                 IDENTIFIER ;
 ```
 
-Revised grammar from section `8.1` and `9.1`.
+Revised statement grammar from section `8.1` and `9.1`.
 
 ```
 program         -> statement* EOF ;
@@ -38,17 +39,22 @@ whileStmt       -> "while" "(" expression ")" statement ;
 block           -> "{" declaration* "}" ;
 ```
 
-Revised grammar for statements that declare names:
+Revised grammar for declarations that declare names and functions:
 
 ```
 program         -> declaration* EOF ;
-declaration     -> varDecl 
+declaration     -> funcDecl | varDecl 
                 | statement ;
+funcDecl        -> "fun" function ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
-statement       -> exprStmt
-                | printStmt
-                | block ;
-block           -> "{" declaration* "}" ;
+```
+
+Utility rules
+
+```
+function        -> IDENTIFIER "(" parameters? ")" block ;
+parameters      -> IDENTIFIER ( "," IDENTIFIER )* ;
+arguments       -> expression ( "," expression )* ;
 ```
 
 For accessing a variable, we can use the `primary` expression:

@@ -11,6 +11,8 @@ import static com.craftinginterpreters.lox.TokenType.*;
  * When the body contains a non-terminal, the corresponding method is called.
  */
 public class Parser {
+    private static final int MAX = 255;
+
     private static class ParseError extends RuntimeException {
     }
 
@@ -42,13 +44,14 @@ public class Parser {
     }
 
     /**
-     * declaration  -> varDecl
+     * declaration  -> funcDecl | varDecl
      * | statement ;
      *
      * @return
      */
     private Stmt declaration() throws ParseError {
         try {
+            if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
             return statement();
         } catch (ParseError parseError) {
@@ -197,6 +200,29 @@ public class Parser {
         return new Stmt.Expression(expr);
     }
 
+    private Stmt.Function function(String kind) {
+        final Token name = consume(IDENTIFIER, String.format("Expect %s name.", kind));
+        consume(LEFT_PAREN, String.format("Expect '(' after %s name.", kind));
+        final List<Token> parameters = new ArrayList<>();
+
+        if (!check(RIGHT_PAREN)) {
+            // parameters are present
+            do {
+                if (parameters.size() > MAX) {
+                    // report the error and continue
+                    error(peek(), String.format("Can't have more than %s parameters", MAX));
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+
+        // check for function end and body begin
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(LEFT_BRACE, String.format("Expect '{' before %s body.", kind));
+        final List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
+    }
+
     /**
      * Consume declarations inside a block.
      *
@@ -222,6 +248,7 @@ public class Parser {
         Expr expr = or();
 
         if (match(EQUAL)) {
+            // IDENTIFIER for the assignment statement
             final Token assignmentTarget = previous();
             final Expr value = assignment();
 
@@ -232,6 +259,7 @@ public class Parser {
 
             error(assignmentTarget, "Invalid assignment target.");
         }
+
         // otherwise it's a `logical or`
         return expr;
     }
@@ -348,7 +376,50 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return call();
+    }
+
+    /**
+     * call -> primary ( "(" arguments? ")" )* ;
+     *
+     * @return
+     */
+    private Expr call() {
+        Expr expr = primary();
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    /**
+     * Parse the call expression.
+     *
+     * @param callee the 'thing' being called
+     * @return
+     */
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+
+        // parse the individual arguments
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() > MAX) {
+                    // report the error and continue
+                    error(peek(), String.format("Can't have more than %s arguments", MAX));
+                }
+                arguments.add(expression());
+            } while (match(COMMA)); // while additional arguments exist
+        }
+
+        final Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+        return new Expr.Call(callee, paren, arguments);
     }
 
     /**
