@@ -62,7 +62,12 @@ public class Parser {
 
     /**
      * statement -> exprStmt
-     * | printStmt ;
+     * | forStmt
+     * | ifStmt
+     * | printStmt
+     * | returnStmt
+     * | whileStmt
+     * | block ;
      *
      * @return
      */
@@ -70,6 +75,7 @@ public class Parser {
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement();
@@ -160,6 +166,20 @@ public class Parser {
         return new Stmt.Print(value);
     }
 
+    private Stmt returnStatement() {
+        final Token keyword = previous();
+        Expr value = null;
+
+        // check if an expression is absent
+        if (!check(SEMICOLON)) {
+            // expression to return
+            value = expression();
+        }
+
+        consume(SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
+    }
+
     private Stmt whileStatement() {
         consume(LEFT_PAREN, "Expect '(' after while.");
         final Expr condition = expression();
@@ -245,7 +265,7 @@ public class Parser {
      * @return
      */
     private Expr assignment() {
-        Expr expr = or();
+        final Expr expr = or();
 
         if (match(EQUAL)) {
             // IDENTIFIER for the assignment statement
@@ -402,7 +422,7 @@ public class Parser {
      * Parse the call expression.
      *
      * @param callee the 'thing' being called
-     * @return
+     * @return a constructed call expression
      */
     private Expr finishCall(Expr callee) {
         List<Expr> arguments = new ArrayList<>();

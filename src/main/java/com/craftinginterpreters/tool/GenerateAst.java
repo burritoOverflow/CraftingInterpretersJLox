@@ -42,6 +42,7 @@ public class GenerateAst {
                 "If         : Expr condition, Stmt thenBranch," +
                         " Stmt elseBranch",
                 "Print       : Expr expression",
+                "Return      : Token keyword, Expr value",
                 "While       : Expr condition, Stmt body",
                 "Var         : Token name, Expr initializer"
         ));
@@ -66,7 +67,7 @@ public class GenerateAst {
      * @param outputDir path to generate the source file for the given BaseName
      * @param basename  the base class
      * @param types     List of types for derived classes
-     * @throws IOException
+     * @throws IOException when file provided is not found
      */
     private static void defineAst(String outputDir, String basename, List<String> types) throws IOException {
         System.out.printf("Generating %s.java in directory %s%n", basename, outputDir);

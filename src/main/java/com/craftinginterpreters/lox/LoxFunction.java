@@ -23,7 +23,13 @@ public class LoxFunction implements LoxCallable {
         }
 
         // execute the body of this function in the function-local environment
-        interpreter.executeBlock(this.declaration.body, environment);
+        try {
+            interpreter.executeBlock(this.declaration.body, environment);
+        } catch (Return returnValue) {
+            // when encountering a return statement, return the value
+            // associated with that statement
+            return returnValue.value;
+        }
         return null;
     }
 

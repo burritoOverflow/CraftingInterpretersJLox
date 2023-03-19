@@ -315,6 +315,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null) {
+            value = evaluate(stmt.value);
+        }
+
+        // unwind and return from the top of the stack back to `call`
+        // (code that began executing the body)
+        throw new Return(value);
+    }
+
+    @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body);
