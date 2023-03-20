@@ -56,8 +56,46 @@ public class Environment {
         throw new RuntimeError(name, String.format("Undefined variable %s.", name.lexeme));
     }
 
+    /**
+     * Traverse a fixed number of environments and add the value with the name as key for that environment.
+     *
+     * @param distance the distance from the current env to traverse to the target env
+     * @param name     the name associated with the value
+     * @param value    the value associated with the name
+     */
+    void assignAt(int distance, Token name, Object value) {
+        ancestor(distance).values.put(name.lexeme, value);
+    }
+
     void define(String name, Object value) {
         values.put(name, value);
+    }
+
+    /**
+     * Get the value for `name` located `distance` from the current environment
+     *
+     * @param distance the `distance` where the value is stored
+     * @param name     the name to get the value for
+     * @return the value associated with name located environment `distance` from the current
+     */
+    Object getAt(Integer distance, String name) {
+        return ancestor(distance).values.get(name);
+    }
+
+    /**
+     * Get the environment `distance` from the current environment by
+     * traversing the parent chain and returning the environment there
+     *
+     * @param distance the distance to traverse up the environment chain
+     * @return the environment distance from the current
+     */
+    Environment ancestor(int distance) {
+        Environment environment = this;
+        for (int i = 0; i < distance; i++) {
+            // walk up enclosing environments
+            environment = environment.enclosing;
+        }
+        return environment;
     }
 
 }

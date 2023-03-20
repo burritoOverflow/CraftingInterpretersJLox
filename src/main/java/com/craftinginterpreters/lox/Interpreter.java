@@ -1,12 +1,17 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     // a fixed reference to the outermost global environment
     final Environment globals = new Environment();
+    // access to each variable's resolved location
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private Environment environment = globals;
+
 
     public Interpreter() {
         this.globals.define("clock", new LoxCallable() {
@@ -49,6 +54,36 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
      */
     private void execute(Stmt statement) {
         statement.accept(this);
+    }
+
+    /**
+     * Add this expression to the local variables where K = expression
+     * and V = depth.
+     *
+     * @param expr  the expression to resolve
+     * @param depth the number of environments between the current env
+     *              and the enclosing one where the
+     *              variable's value resides
+     */
+    public void resolve(Expr expr, int depth) {
+        this.locals.put(expr, depth);
+    }
+
+    /**
+     * Get the variable's value
+     *
+     * @param name the name to retrieve the value for
+     * @param expr expression to find the distance for
+     * @return
+     */
+    private Object lookupVariable(Token name, Expr expr) {
+        final Integer distance = locals.get(expr);
+        if (distance != null) {
+            // get the variable's value from the environment at `distance`
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return globals.get(name);
+        }
     }
 
     /**
@@ -128,8 +163,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
-        Object value = evaluate(expr.value);
-        environment.assign(expr.name, value);
+        final Object value = evaluate(expr.value);
+        Integer distance = locals.get(expr);
+
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value);
+        } else {
+            // assume it's global
+            globals.assign(expr.name, value);
+        }
+
         return value;
     }
 
@@ -250,7 +293,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        return environment.get(expr.name);
+        return lookupVariable(expr.name, expr);
     }
 
     @Override

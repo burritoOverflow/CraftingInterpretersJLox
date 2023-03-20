@@ -67,6 +67,12 @@ public final class Lox {
         // stop parsing if there is a syntax error
         if (hadError) return;
 
+        // only run resolver if there are no parse errors
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
+
+        // stop if there was a resolution error
+        if (hadError) return;
         interpreter.interpret(statements);
     }
 
@@ -101,7 +107,7 @@ public final class Lox {
      */
     public static void runtimeError(RuntimeError error) {
         final String errorMessage = error.getMessage();
-        System.err.println(String.format("%s\n[line %d]", errorMessage, error.token.line));
+        System.err.printf("%s\n[line %d]%n", errorMessage, error.token.line);
         hadRuntimeError = true;
     }
 }
