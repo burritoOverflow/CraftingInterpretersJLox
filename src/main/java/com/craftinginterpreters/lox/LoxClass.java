@@ -1,6 +1,8 @@
 package com.craftinginterpreters.lox;
 
-public class LoxClass {
+import java.util.List;
+
+public class LoxClass implements LoxCallable {
     final String className;
 
     public LoxClass(String className) {
@@ -10,5 +12,16 @@ public class LoxClass {
     @Override
     public String toString() {
         return this.className;
+    }
+
+    @Override
+    public int arity() {
+        return 0;
+    }
+
+    @Override
+    public Object call(Interpreter interpreter, List<Object> arguments) {
+        final LoxInstance instance = new LoxInstance(this);
+        return instance;
     }
 }

@@ -1,4 +1,4 @@
-The parser's grammar is as follows (see page 84):
+The parser's grammar is as follows (see page 84, 199):
 
 ```
 expression      -> assignment ;
@@ -12,7 +12,7 @@ term            -> factor ( ( "-" | "+" ) factor )* ;
 factor          -> unary ( ( "/" | "*" ) unary )* ;
 unary           -> ( "!" | "-" ) unary
                 | call ;
-call            -> primary ( "(" arguments? ")" )* ;
+call            -> primary ( "(" arguments? ")"  | "." IDENTIFIER )* ;
 primary         -> NUMBER | STRING | "true" | "false" | "nil"                   
                 | "(" expression ")" ;
                 IDENTIFIER ;
