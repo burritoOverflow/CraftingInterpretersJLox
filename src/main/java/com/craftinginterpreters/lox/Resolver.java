@@ -11,19 +11,13 @@ import java.util.Stack;
  */
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
-    private FunctionType currentFunctionType = FunctionType.NONE;
-
     // store the name of the variable and if it's been resolved
     private final Stack<Map<String, Boolean>> scopes;
+    private FunctionType currentFunctionType = FunctionType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
         this.scopes = new Stack<>();
-    }
-
-    private enum FunctionType {
-        NONE,
-        FUNCTION
     }
 
     void resolve(List<Stmt> statements) {
@@ -182,6 +176,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+        return null;
+    }
+
+    @Override
     public Void visitExpressionStmt(Stmt.Expression stmt) {
         this.resolve(stmt.expression);
         return null;
@@ -238,6 +239,11 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
         define(stmt.name);
         return null;
+    }
+
+    private enum FunctionType {
+        NONE,
+        FUNCTION
     }
 
 

@@ -41,12 +41,15 @@ whileStmt       -> "while" "(" expression ")" statement ;
 block           -> "{" declaration* "}" ;
 ```
 
-Revised grammar for declarations that declare names and functions:
+Revised grammar for declarations that declare classes, names, and functions:
 
 ```
 program         -> declaration* EOF ;
-declaration     -> funcDecl | varDecl 
+declaration     -> classDecl 
+                | funcDecl 
+                | varDecl 
                 | statement ;
+classDecl       -> "class" IDENTIFIER "{" function* "}" ;
 funcDecl        -> "fun" function ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 ```

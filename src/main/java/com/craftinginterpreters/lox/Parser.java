@@ -46,6 +46,7 @@ public class Parser {
      */
     private Stmt declaration() throws ParseError {
         try {
+            if (match(CLASS)) return classDeclaration();
             if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
             return statement();
@@ -53,6 +54,26 @@ public class Parser {
             synchronize();
             return null;
         }
+    }
+
+    /**
+     * classDecl -> "class" IDENTIFIER "{" function* "}" ;
+     *
+     * @return a new Class with the class name and methods
+     */
+    private Stmt classDeclaration() {
+        final Token className = consume(IDENTIFIER, "Expect class name.");
+        consume(LEFT_BRACE, "Expect '{' after class declaration and before class body.");
+
+        // collect each method in the class body
+        // here, we are not explicitly listing fields in the class decl (see page 195)
+        final List<Stmt> methods = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+
+        consume(RIGHT_BRACE, "Expect '}' after class body.");
+        return new Stmt.Class(className, methods);
     }
 
     /**
