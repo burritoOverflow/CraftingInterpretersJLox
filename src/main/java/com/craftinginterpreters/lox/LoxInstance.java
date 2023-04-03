@@ -21,4 +21,8 @@ public class LoxInstance {
     public String toString() {
         return this.klass.className + " instance";
     }
+
+    public void set(Token name, Object value) {
+        this.fields.put(name.lexeme, value);
+    }
 }
