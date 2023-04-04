@@ -44,7 +44,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     /**
      * Set the token `name` as defined
-     * Should be called once the initializer expression in the same scope has been resolve.d
+     * Should be called once the initializer expression in the same scope has been resolved
      * post-condition - variable is fully-initialized and ready to be used.
      *
      * @param name the Token to define
@@ -192,6 +192,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitClassStmt(Stmt.Class stmt) {
         declare(stmt.name);
         define(stmt.name);
+
+        for (Stmt.Function method : stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            resolveFunction(method, declaration);
+        }
+
         return null;
     }
 
@@ -256,6 +262,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private enum FunctionType {
         NONE,
+        METHOD,
         FUNCTION
     }
 

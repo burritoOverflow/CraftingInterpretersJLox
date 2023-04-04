@@ -67,7 +67,7 @@ public class Parser {
 
         // collect each method in the class body
         // here, we are not explicitly listing fields in the class decl (see page 195)
-        final List<Stmt> methods = new ArrayList<>();
+        final List<Stmt.Function> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"));
         }
@@ -275,7 +275,8 @@ public class Parser {
     }
 
     /**
-     * assignment -> IDENTIFIER "=" assignment | logic_or ;
+     * assignment ->  ( call "." )? IDENTIFIER "=" assignment
+     * | logic_or ;
      *
      * @return
      */
@@ -403,7 +404,7 @@ public class Parser {
 
     /**
      * unary    -> ( "!" | "-" ) unary
-     * | primary ;
+     * | call ;
      *
      * @return
      */
@@ -418,7 +419,7 @@ public class Parser {
     }
 
     /**
-     * call -> primary ( "(" arguments? ")" )* ;
+     * call -> primary ( "(" arguments? ")"  | "." IDENTIFIER )* ;
      *
      * @return
      */
@@ -446,7 +447,7 @@ public class Parser {
      * @return a constructed call expression
      */
     private Expr finishCall(Expr callee) {
-        List<Expr> arguments = new ArrayList<>();
+        final List<Expr> arguments = new ArrayList<>();
 
         // parse the individual arguments
         if (!check(RIGHT_PAREN)) {

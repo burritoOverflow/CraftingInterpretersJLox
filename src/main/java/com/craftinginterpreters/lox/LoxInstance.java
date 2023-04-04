@@ -12,8 +12,22 @@ public class LoxInstance {
         this.fields = new HashMap<>();
     }
 
-    Object get(Token name) {
-        if (this.fields.containsKey(name.lexeme)) return this.fields.get(name.lexeme);
+    /**
+     * Retrieve a method or field from this Instance for the `name` provided
+     *
+     * @param name the name to retrieve
+     * @return the Object corresponding to the field or method, if found.
+     */
+    Object get(Token name) throws RuntimeError {
+        if (this.fields.containsKey(name.lexeme)) {
+            return this.fields.get(name.lexeme);
+        }
+
+        final LoxFunction method = this.klass.findMethod(name.lexeme);
+        if (method != null) {
+            return method;
+        }
+
         throw new RuntimeError(name, String.format("Undefined property %s.", name.lexeme));
     }
 
