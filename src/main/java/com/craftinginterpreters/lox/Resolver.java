@@ -14,6 +14,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     // store the name of the variable and if it's been resolved
     private final Stack<Map<String, Boolean>> scopes;
     private FunctionType currentFunctionType = FunctionType.NONE;
+    private ClassType currentClass = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -163,6 +164,16 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitThisExpr(Expr.This expr) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+        resolveLocal(expr, expr.keyword);
+        return null;
+    }
+
+    @Override
     public Void visitVariableExpr(Expr.Variable expr) {
         // if the variable exists in the current scope but is not yet defined.
         // i.e variable being accessed in its own initializer.
@@ -190,14 +201,28 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        final ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
+
         declare(stmt.name);
         define(stmt.name);
+
+        // define `this` and the class's methods in a new scope
+        beginScope();
+
+        // see pg. 210
+        // whenever `this` expression is encountered it will resolve to a
+        // local variable in an implicit scope outside of the block for the method body
+        scopes.peek().put("this", true);
 
         for (Stmt.Function method : stmt.methods) {
             FunctionType declaration = FunctionType.METHOD;
             resolveFunction(method, declaration);
         }
 
+        // restore the original once the methods have been resolved
+        currentClass = enclosingClass;
+        endScope();
         return null;
     }
 
@@ -266,5 +291,9 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         FUNCTION
     }
 
+    private enum ClassType {
+        NONE,
+        CLASS
+    }
 
 }

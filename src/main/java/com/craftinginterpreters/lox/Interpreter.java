@@ -79,7 +79,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Object lookupVariable(Token name, Expr expr) {
         final Integer distance = locals.get(expr);
         if (distance != null) {
-            // get the variable's value from the environment at `distance`
+            // get the variable's value from the environment at `distance` (traverse parent scopes)
             return environment.getAt(distance, name.lexeme);
         } else {
             return globals.get(name);
@@ -311,6 +311,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         final Object value = evaluate(expr.value);
         ((LoxInstance) object).set(expr.name, value);
         return value;
+    }
+
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookupVariable(expr.keyword, expr);
     }
 
     @Override
