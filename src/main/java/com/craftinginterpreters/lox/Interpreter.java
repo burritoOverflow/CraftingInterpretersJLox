@@ -349,10 +349,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
         environment.define(stmt.name.lexeme, null);
-
+        // K: MethodName V: LoxFunction corresponding to the MethodName
         final Map<String, LoxFunction> methods = new HashMap<>();
+
         for (Stmt.Function method : stmt.methods) {
-            final LoxFunction function = new LoxFunction(method, environment);
+            // determine if init method is present
+            final boolean isInitializer = method.name.lexeme.equals("init");
+            final LoxFunction function = new LoxFunction(method, environment, isInitializer);
             methods.put(method.name.lexeme, function);
         }
 
@@ -376,7 +379,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
         // provide the environment to the newly declared function that exists when the func is declared.
-        final LoxFunction function = new LoxFunction(stmt, this.environment);
+        final LoxFunction function = new LoxFunction(stmt, this.environment, false);
         // bind the function to the function's identifier
         // and store a reference to it in the current environment
         environment.define(stmt.name.lexeme, function);

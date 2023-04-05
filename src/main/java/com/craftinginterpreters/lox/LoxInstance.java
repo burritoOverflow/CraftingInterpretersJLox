@@ -34,7 +34,18 @@ public class LoxInstance {
 
     @Override
     public String toString() {
-        return this.klass.className + " instance";
+        final String instanceStr = String.format("%s instance", this.klass.className);
+        StringBuilder stringBuilder = new StringBuilder(instanceStr);
+
+        if (!this.fields.isEmpty()) {
+            for (Map.Entry<String, Object> field : this.fields.entrySet()) {
+                final String fieldStr = String.format("\n%s.%s -> %s", this.klass.className,
+                        field.getKey(), field.getValue());
+                stringBuilder.append(fieldStr);
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
     public void set(Token name, Object value) {
