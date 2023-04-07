@@ -35,7 +35,7 @@ public class LoxInstance {
     @Override
     public String toString() {
         final String instanceStr = String.format("%s instance", this.klass.className);
-        StringBuilder stringBuilder = new StringBuilder(instanceStr);
+        final StringBuilder stringBuilder = new StringBuilder(instanceStr);
 
         if (!this.fields.isEmpty()) {
             for (Map.Entry<String, Object> field : this.fields.entrySet()) {
@@ -48,6 +48,12 @@ public class LoxInstance {
         return stringBuilder.toString();
     }
 
+    /**
+     * Set the instance's state for this field to the value provided
+     *
+     * @param name  the field to set
+     * @param value the value to assign to the field
+     */
     public void set(Token name, Object value) {
         this.fields.put(name.lexeme, value);
     }

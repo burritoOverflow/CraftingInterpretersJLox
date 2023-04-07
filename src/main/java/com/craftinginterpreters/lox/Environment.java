@@ -7,7 +7,8 @@ public class Environment {
     // for this environment's enclosing scope
     final Environment enclosing;
 
-    // stores the bindings that associate variables to values
+    // stores the bindings that associate variables to values, i.e `var a = 12`
+    // where `a` is the name and `12` is the value
     private final Map<String, Object> values;
 
     public Environment() {
@@ -20,6 +21,13 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
+    /**
+     * Recursively attempt to retrieve a value from this environment (and the enclosing environments)
+     *
+     * @param name the name to locate
+     * @return the value associated with the name
+     * @throws RuntimeError when the variable is not found in this environment (undefined variable)
+     */
     Object get(Token name) throws RuntimeError {
         if (values.containsKey(name.lexeme)) {
             return values.get(name.lexeme);
@@ -35,24 +43,27 @@ public class Environment {
     }
 
     /**
-     * Assign a value to a name in the environment iff it already exists
+     * Recursively assign a value to a name in the environment iff it already exists
      *
      * @param name  the name to assign the value to
-     * @param value the value
+     * @param value the value to assign to the name
      */
     void assign(Token name, Object value) throws RuntimeError {
         // assignment differs from definition as assignment is not allowed to create a new variable
         if (values.containsKey(name.lexeme)) {
+            // if the current environment contains the name, assign
             values.put(name.lexeme, value);
             return;
         }
 
         // recursively attempt to assign the value to the name
+        // (traverse enclosing scopes until the name is found)
         if (enclosing != null) {
             enclosing.assign(name, value);
             return;
         }
 
+        // attempt made to assign to a name that was not previously defined
         throw new RuntimeError(name, String.format("Undefined variable %s.", name.lexeme));
     }
 
@@ -72,7 +83,7 @@ public class Environment {
     }
 
     /**
-     * Get the value for `name` located `distance` from the current environment
+     * Get the value for `name` located `distance`environments from the current environment
      *
      * @param distance the `distance` where the value is stored
      * @param name     the name to get the value for
@@ -83,8 +94,8 @@ public class Environment {
     }
 
     /**
-     * Get the environment `distance` from the current environment by
-     * traversing the parent chain and returning the environment there
+     * Get the environment `distance` environments from the current environment by
+     * traversing the parent chain and returning that environment
      *
      * @param distance the distance to traverse up the environment chain
      * @return the environment distance from the current

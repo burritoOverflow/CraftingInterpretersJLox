@@ -18,6 +18,11 @@ public class LoxClass implements LoxCallable {
         return this.className;
     }
 
+    /**
+     * The number of arguments the function expects
+     *
+     * @return the initializer methods' arity; returns null if initializer not present
+     */
     @Override
     public int arity() {
         final LoxFunction initializer = findMethod("init");

@@ -6,6 +6,8 @@ public class LoxFunction implements LoxCallable {
     // store the environment surrounding the function's declaration
     private final Environment closure;
     private final Stmt.Function declaration;
+
+    // for classes
     private final boolean isInitializer;
 
     public LoxFunction(Stmt.Function declaration, Environment closure, boolean isInitializer) {
@@ -14,11 +16,24 @@ public class LoxFunction implements LoxCallable {
         this.isInitializer = isInitializer;
     }
 
+    /**
+     * The number of arguments expected for this function
+     *
+     * @return see above.
+     */
     @Override
     public int arity() {
         return this.declaration.params.size();
     }
 
+    /**
+     * Invoke this function and return the value (when appropriate), using the values supplied
+     * via `arguments`
+     *
+     * @param interpreter used for executing the function's block
+     * @param arguments   the arguments provided to the function for invocation
+     * @return the value returned from evaluating the function
+     */
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         // use the provided closure environment as the call's environment
@@ -57,7 +72,7 @@ public class LoxFunction implements LoxCallable {
      * When this method is called, the that becomes the parent of the method's env.
      *
      * @param instance the instance to bind the method to
-     * @return
+     * @return a LoxFunction with a persistent environment containing its closure
      */
     LoxFunction bind(LoxInstance instance) {
         Environment environment = new Environment(this.closure);

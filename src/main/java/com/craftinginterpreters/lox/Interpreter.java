@@ -8,6 +8,7 @@ import java.util.Map;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     // a fixed reference to the outermost global environment
     final Environment globals = new Environment();
+
     // access to each variable's resolved location
     private final Map<Expr, Integer> locals = new HashMap<>();
     private Environment environment = globals;
@@ -35,7 +36,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     /**
      * Public interface for the Interpreter
      *
-     * @param statements the list of statements to interpret
+     * @param statements the list of statements to execute in the interpreter
      */
     void interpret(List<Stmt> statements) {
         try {
@@ -157,14 +158,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         // defensively to avoid NullPointers
         if (a == null && b == null) return true;
         if (a == null) return false;
-
         return a.equals(b);
     }
 
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         final Object value = evaluate(expr.value);
-        Integer distance = locals.get(expr);
+        final Integer distance = locals.get(expr);
 
         if (distance != null) {
             environment.assignAt(distance, expr.name, value);
@@ -348,10 +348,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        // Define the lexeme in this the environment
         environment.define(stmt.name.lexeme, null);
         // K: MethodName V: LoxFunction corresponding to the MethodName
         final Map<String, LoxFunction> methods = new HashMap<>();
 
+        // collect this class's methods
         for (Stmt.Function method : stmt.methods) {
             // determine if init method is present
             final boolean isInitializer = method.name.lexeme.equals("init");
@@ -359,6 +361,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             methods.put(method.name.lexeme, function);
         }
 
+        // add the class to this environment
         final LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
         environment.assign(stmt.name, klass);
         return null;
