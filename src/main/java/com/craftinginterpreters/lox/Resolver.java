@@ -57,6 +57,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         this.scopes.peek().put(name.lexeme, true);
     }
 
+    /**
+     * Resolve via the interpreter the scope distance (number of "hops") that must
+     * be traversed along the environment chain to locate the variable
+     *
+     * @param expr expression to resolve
+     * @param name the name for the expression to locate in the currently existing `scopes`
+     */
     private void resolveLocal(Expr expr, Token name) {
         for (int i = this.scopes.size() - 1; i >= 0; i--) {
             if (this.scopes.get(i).containsKey(name.lexeme)) {
@@ -164,6 +171,18 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitSuperExpr(Expr.Super expr) {
+        if (currentClass == ClassType.NONE) {
+            Lox.error(expr.keyword, "Cannot use 'super' outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+            Lox.error(expr.keyword, "Cannot use 'super' in a class without a superclass.");
+        }
+        // resolve super token as if it's a variable
+        resolveLocal(expr, expr.keyword);
+        return null;
+    }
+
+    @Override
     public Void visitThisExpr(Expr.This expr) {
         if (currentClass == ClassType.NONE) {
             Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
@@ -207,8 +226,25 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declare(stmt.name);
         define(stmt.name);
 
+        // ensure attempts to derive from itself fail, i.e class `Oops < Oops {}`
+        if (stmt.superclass != null &&
+                stmt.superclass.name.lexeme.equals(stmt.name.lexeme)) {
+            Lox.error(stmt.superclass.name, "A class cannot inherit from itself.");
+        }
+
+        if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
+            resolve(stmt.superclass);
+        }
+
+        if (stmt.superclass != null) {
+            // create a new scope surrounding all of the superclass's methods
+            beginScope(); // start superclass scope
+            scopes.peek().put("super", true);
+        }
+
         // define `this` and the class's methods in a new scope
-        beginScope();
+        beginScope(); // start this class's scope
 
         // see pg. 210
         // whenever `this` expression is encountered it will resolve to a
@@ -223,7 +259,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         // restore the original once the methods have been resolved
         currentClass = enclosingClass;
-        endScope();
+        endScope(); // end this class's scope
+
+        if (stmt.superclass != null) {
+            endScope(); // end superclass scope
+        }
+
         return null;
     }
 
@@ -301,7 +342,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private enum ClassType {
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
 
 }

@@ -314,6 +314,22 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Object visitSuperExpr(Expr.Super expr) {
+        final int distance = this.locals.get(expr);
+        final LoxClass superclass = (LoxClass) environment.getAt(distance, "super");
+
+        // `this` is always bound is right inside of the environment where `super` is bound
+        final LoxInstance instance = (LoxInstance) environment.getAt(distance - 1, "this");
+        final LoxFunction superclassMethod = superclass.findMethod(expr.method.lexeme);
+        if (superclassMethod == null) {
+            throw new RuntimeError(expr.method,
+                    String.format("Undefined property %s.", expr.method.lexeme));
+        }
+
+        return superclassMethod.bind(instance);
+    }
+
+    @Override
     public Object visitThisExpr(Expr.This expr) {
         return lookupVariable(expr.keyword, expr);
     }
@@ -348,8 +364,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        Object superclass = null;
+        if (stmt.superclass != null) {
+            superclass = evaluate(stmt.superclass);
+            // ensure this isn't an incorrectly used symbol
+            if (!(superclass instanceof LoxClass)) {
+                throw new RuntimeError(stmt.superclass.name, "Superclass must be a class");
+            }
+        }
+
         // Define the lexeme in this the environment
         environment.define(stmt.name.lexeme, null);
+
+        if (stmt.superclass != null) {
+            // create the superclass environment with the current as enclosing
+            environment = new Environment(environment);
+            environment.define("super", superclass);
+        }
+
         // K: MethodName V: LoxFunction corresponding to the MethodName
         final Map<String, LoxFunction> methods = new HashMap<>();
 
@@ -362,7 +394,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         // add the class to this environment
-        final LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+        final LoxClass klass = new LoxClass(stmt.name.lexeme, (LoxClass) superclass, methods);
+
+        // pg. 231 - LoxFunctions capture the current env, where super is bound as their closure
+        // holding on to the superclass
+        if (superclass != null) {
+            // after the methods are bound restore the original environment
+            environment = environment.enclosing;
+        }
+
         environment.assign(stmt.name, klass);
         return null;
     }

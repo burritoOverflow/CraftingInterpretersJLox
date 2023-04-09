@@ -10,6 +10,7 @@ import static com.craftinginterpreters.lox.TokenType.*;
 public class Scanner {
     /*
         start and current are offsets that index into the string
+
         start - points to the 1st char in the lexeme
         current - points to the character currently being considered
         line - tracks what source line current is on

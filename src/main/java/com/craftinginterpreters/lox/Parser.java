@@ -63,6 +63,14 @@ public class Parser {
      */
     private Stmt classDeclaration() {
         final Token className = consume(IDENTIFIER, "Expect class name.");
+
+        Expr.Variable superclassName = null;
+        // class DerivedClass < SuperClass
+        if (match(LESS)) {
+            consume(IDENTIFIER, "Expect superclass name.");
+            superclassName = new Expr.Variable(previous());
+        }
+
         consume(LEFT_BRACE, "Expect '{' after class declaration and before class body.");
 
         // collect each method in the class body
@@ -73,7 +81,7 @@ public class Parser {
         }
 
         consume(RIGHT_BRACE, "Expect '}' after class body.");
-        return new Stmt.Class(className, methods);
+        return new Stmt.Class(className, superclassName, methods);
     }
 
     /**
@@ -489,6 +497,13 @@ public class Parser {
 
         if (match(THIS)) {
             return new Expr.This(previous());
+        }
+
+        if (match(SUPER)) {
+            final Token keyword = previous();
+            consume(DOT, "Expect '.' after identifier");
+            final Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expr.Super(keyword, method);
         }
 
         if (match(IDENTIFIER)) {

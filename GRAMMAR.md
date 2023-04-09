@@ -13,9 +13,8 @@ factor          -> unary ( ( "/" | "*" ) unary )* ;
 unary           -> ( "!" | "-" ) unary
                 | call ;
 call            -> primary ( "(" arguments? ")"  | "." IDENTIFIER )* ;
-primary         -> NUMBER | STRING | "true" | "false" | "nil"                   
-                | "(" expression ")" ;
-                IDENTIFIER ;
+primary         -> "true" | "false" | "nil" | "this" | NUMBER | STRING | IDENTIFIER
+                | "(" expression ")" | "super" "." IDENTIFIER ;
 ```
 
 Revised statement grammar from section `8.1` and `9.1`.
@@ -41,7 +40,7 @@ whileStmt       -> "while" "(" expression ")" statement ;
 block           -> "{" declaration* "}" ;
 ```
 
-Revised grammar for declarations that declare classes, names, and functions:
+Revised grammar for declarations that declare classes (including superclasses), names, and functions:
 
 ```
 program         -> declaration* EOF ;
@@ -49,7 +48,7 @@ declaration     -> classDecl
                 | funcDecl 
                 | varDecl 
                 | statement ;
-classDecl       -> "class" IDENTIFIER "{" function* "}" ;
+classDecl       -> "class" IDENTIFIER ( "<" IDENTIFIER )? "{" function* "}" ;
 funcDecl        -> "fun" function ;
 varDecl         -> "var" IDENTIFIER ( "=" expression )? ";" ;
 ```
@@ -61,14 +60,3 @@ function        -> IDENTIFIER "(" parameters? ")" block ;
 parameters      -> IDENTIFIER ( "," IDENTIFIER )* ;
 arguments       -> expression ( "," expression )* ;
 ```
-
-For accessing a variable, we can use the `primary` expression:
-
-```
-primary     -> "true" | "false" | "nil"
-            | NUMBER | STRING 
-            | "(" expression ")"
-            IDENTIFIER ;
-```
-
-Note that unlike the original primary, this includes IDENTIFIER.
